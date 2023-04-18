@@ -153,6 +153,7 @@ class MainActivity : ComponentActivity(), AMapLocationListener, LocationSource {
                 var page4switch3 by remember{ mutableStateOf(false) }
                 var page4selector1 by remember{ mutableStateOf(1) }
                 var page4selector2 by remember{ mutableStateOf(1) }
+                var easterEgg_touchcount by remember{ mutableStateOf(1) }
                 //当关闭page4switch3时使用GNSS画轨迹
                 DrawMapLineAndGetMapLocationOnLocationChange={B,L,H->
                     sensorsData.maplocationData[0] = B
@@ -166,13 +167,22 @@ class MainActivity : ComponentActivity(), AMapLocationListener, LocationSource {
                             mapListener!!.onLocationChanged(myaMaplocation)
                         }
                         GNSSlatLngs.add(LatLng(B, L))
-                        aMap!!.addPolyline(PolylineOptions().addAll(GNSSlatLngs).width(30f).color(Color.argb(255, 255, 0, 0)))
+                        if(easterEgg_touchcount>=10){
+                            val colorList = assignRainbowColors(GNSSlatLngs.size)
+                            aMap!!.addPolyline(PolylineOptions().addAll(GNSSlatLngs).width(30f).colorValues(colorList).useGradient(true))
+                        }
+                        else {
+                            aMap!!.addPolyline(
+                                PolylineOptions().addAll(GNSSlatLngs).width(30f)
+                                    .color(Color.argb(255, 255, 0, 0))
+                            )
+                        }
                     }
                     else{
                         GNSSlatLngs.clear()
                     }
                 }
-                DrawPDRinMap(sensorsData = sensorsData, isPDR = page4switch3)
+                DrawPDRinMap(sensorsData = sensorsData, isPDR = page4switch3, easterEgg_touchcount = easterEgg_touchcount)
                 setLanguage(LanguageOption)
                 Scaffold(bottomBar = {TheBottomNavigationBar(navController = navController, LanguageOption = LanguageOption)}) { padding->
                     NavHost(navController = navController, modifier = Modifier.padding(padding), startDestination = "PageOne"){
@@ -218,7 +228,8 @@ class MainActivity : ComponentActivity(), AMapLocationListener, LocationSource {
                                 Click5 = {page4selector2 = 2
                                          ThemeOption = DarkMode},
                                 Click6 = {page4selector2 = 3
-                                         ThemeOption = KMMode})
+                                         ThemeOption = KMMode},
+                            trigger = { easterEgg_touchcount += 1 })
                         }
                     }
                 }
@@ -728,7 +739,7 @@ fun Accldatachart(sensorsData: SensorsData){
 }
 
 @Composable
-fun PageFour(modifier: Modifier = Modifier, switcher1:Boolean, switcher2:Boolean, switcher3:Boolean, selector1: Int, selector2:Int,Switch1:(Boolean)->Unit, Switch2:(Boolean)->Unit, Switch3:(Boolean)->Unit, Click1:()->Unit, Click2:()->Unit, Click3:()->Unit, Click4:()->Unit, Click5:()->Unit, Click6:()->Unit){
+fun PageFour(modifier: Modifier = Modifier, switcher1:Boolean, switcher2:Boolean, switcher3:Boolean, selector1: Int, selector2:Int,Switch1:(Boolean)->Unit, Switch2:(Boolean)->Unit, Switch3:(Boolean)->Unit, Click1:()->Unit, Click2:()->Unit, Click3:()->Unit, Click4:()->Unit, Click5:()->Unit, Click6:()->Unit, trigger: () -> Unit){
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         if(selector2 == 3) {
             Image(
@@ -752,9 +763,9 @@ fun PageFour(modifier: Modifier = Modifier, switcher1:Boolean, switcher2:Boolean
             Divider(thickness = 1.dp)
             AButtonWithThreeButton(selector = selector2, list2, {Click4()}, {Click5()}, {Click6()})
             Divider(thickness = 1.dp)
-            TextExpansion(title = abouttitle, content = aboutcontent)
+            TextExpansion(title = abouttitle, content = aboutcontent, trigger = trigger)
             Divider(thickness = 1.dp)
-            TextExpansion(title = contactustitle, content = contactuscontent)
+            TextExpansion(title = contactustitle, content = contactuscontent, trigger = {})
         }
     }
 }
@@ -998,13 +1009,14 @@ fun AButtonWithThreeButton( selector: Int, stringList: List<String>, onClicked1:
 }
 
 @Composable
-fun TextExpansion(modifier: Modifier = Modifier, title:String, content:String) {
+fun TextExpansion(modifier: Modifier = Modifier, title:String, content:String, trigger:()->Unit) {
     var isClicked by rememberSaveable { mutableStateOf(false) }
     Column() {
         Box() {
             Surface(
                 color = MaterialTheme.colors.surface,
-                modifier = Modifier.clickable { isClicked = !isClicked }) {
+                modifier = Modifier.clickable { isClicked = !isClicked
+                    trigger()}) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
