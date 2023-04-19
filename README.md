@@ -8,3 +8,4 @@ This application realizes the function of visualizing the data output of the mot
 
 
 このアプリケーションは、携帯電話に搭載された働作センサーのデータ出力を可視化し、衛星測位(GNSS)や携帯電話に搭載されたセンサーだけで航跡推定(PDR)を行い、地図上で走行軌跡をリアルタイムで描画する機能を実現します。PDRモードでは、まずGNSSをオンにして座標の初期値を取り、その後これをオフにして携帯を平らにし、携帯の長軸方向を走行方向に向けて正しい針路角を取ります。その後、アプリが自働的に歩行を検知して軌跡を描いてくれます!
+![Screenrecorder-2023-04-19-13-04-20-638](https://user-images.githubusercontent.com/124596304/233115547-c1f95e7d-d0bc-40fb-ba62-b24db750fdd2.gif)
